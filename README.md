@@ -67,7 +67,9 @@ cd 3rd/openssl/
 ```
 
 Note: 
+
 Change the "<YOUR_CROSS_COMPILER>" to your cross compiler prefix. E.g.: mips-linux-gnu- etc.
+
 Change the "<YOUR_PLATFORM>" to your target platform. E.g.: linux-x86_64 or linux-mips etc. And you may need to modify the generated Makefile on some platform and remove unsupported options.
 
 4. Make OpenSSL project
