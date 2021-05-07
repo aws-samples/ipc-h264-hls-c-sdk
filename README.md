@@ -145,7 +145,9 @@ S3_HLS_Set_Segmentation_Frame_Count(3); // seperate file when there are 3 sps fr
 The default values of above parameters are:
 
 FPS: 30
+
 Segmentation_Frame: S3_HLS_H264E_NALU_SPS
+
 Segmentation_Frame_Count: 3
 
 3. In the main thread of processing frames
