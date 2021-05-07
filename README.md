@@ -40,7 +40,12 @@ IPC Memory Buffer (TS Format)
 ## How to Compile
 
 1. Clone the current repository.
+
+```
+
 git clone https://github.com/aws-samples/ipc-h264-hls-c-sdk.git
+
+```
 
 2. Ensure the 3rd OpenSSL project is working.
 
