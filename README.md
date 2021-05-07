@@ -37,7 +37,75 @@ IPC Memory Buffer (TS Format)
 
 ```
 
-##IPC-H264-HLS-C-SDK usage sudo code example:
+## How to Compile
+
+1. Clone the current repository.
+git clone https://github.com/aws-samples/ipc-h264-hls-c-sdk.git
+
+2. Ensure the 3rd OpenSSL project is working.
+
+```
+
+cd ipc-h264-hls-c-sdk/
+git submodule init
+git submodule update
+
+```
+
+3. Configure OpenSSL project.
+
+```
+
+cd 3rd/openssl/
+./Configure --prefix=$(pwd)/output –-cross-compile-prefix=<YOUR_CROSS_COMPILER>  no-asan no-asm no-async no-buildtest-c++ no-camellia no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-devcryptoeng no-dso no-dynamic-engine no-ec_nistp_64_gcc_128 no-egd no-external-tests no-fuzz-afl no-fuzz-libfuzzer no-heartbeats no-hw no-idea no-md2 no-md4 no-mdc2 no-msan no-ocsp no-rc5 no-rfc3779 no-rmd160 no-sctp no-seed no-shared no-srp no-sse2 no-ssl-trace no-ssl3 no-ssl3-method no-threads no-ts no-ubsan no-unit-test no-weak-ssl-ciphers no-zlib no-zlib-dynamic <YOUR_PLATFORM>
+
+```
+
+Note: 
+Change the "<YOUR_CROSS_COMPILER>" to your cross compiler prefix. E.g.: mips-linux-gnu- etc.
+Change the "<YOUR_PLATFORM>" to your target platform. E.g.: linux-x86_64 or linux-mips etc. And you may need to modify the generated Makefile on some platform and remove unsupported options.
+
+4. Make OpenSSL project
+
+```
+
+make
+
+```
+
+Check the libcrypto.a & libssl.a files are generated in the openssl directory.
+
+5. Compile IPC-H264-HLS-C-SDK
+
+```
+
+cd ../..
+
+```
+
+Edit Makefile, add CROSS_COMPILE prefix if necessary. 
+
+```
+  
+CROSS_COMPILE=<YOUR_CROSS_CIMPILER>
+CC=$(CROSS_COMPILE)gcc
+LD=$(CROSS_COMPILE)ld
+AR=$(CROSS_COMPILE)ar
+
+```
+
+Compile IPC-H264-HLS-C-SDK.
+
+```
+
+make
+
+```
+
+
+Check the s3_hls.a file is generated in the directory. You need to link this library and corresponding libcrypto.a libssl.a library when creating your own application.
+
+## IPC-H264-HLS-C-SDK usage sudo code example:
 
 1. Initialize the system
 
