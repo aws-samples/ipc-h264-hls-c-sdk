@@ -9,11 +9,13 @@ With this SDK, IPC vendors don't need to pay for EC2 instances that receiving th
 The input parameters of this SDK inclucde AK/SK/Token for AWS S3 access, region name, bucket name and s3 object prefix (ususally the iot device certificate id). 
 
 System requirement:
-The IPC should run a linux OS inside.
-Memory should be 3.5-4MB @ 5Mbps data rate. Can adjust according to the data rate when initialize the SDK.
+IPC running Linux with H264 video encoding.
+SoC should have 3.5-4MB available memory when running @ 5Mbps data rate (Common data rate for 1080P video). 
+Memory buffer can be adjusted according to the data rate when initialize the SDK.
 
-3rd party library:
-Need OpenSSL 1.1.1 to build this project.
+3rd party library: (Already provided as submodule)
+OpenSSL 1.1.1 
+Curl 7.70
 
 ## Design Overview
 
@@ -29,11 +31,24 @@ Data flow is as following
             |
             |
             v
-IPC Memory Buffer (TS Format)
+S3_HLS_SDK Put Video/Audio Frame
+    (Package to TS format)
             |
             |
             v
-         Amazon S3
+    S3_HLS_Buffer_Mgr (Cache)
+            |
+            |
+            v
+        Upload Queue
+            |
+            |
+            v
+    S3_HLS_S3_Put_Client
+            |
+            |
+            v
+         Amazon S3 (On Cloud)
 
 ```
 
@@ -62,7 +77,7 @@ git submodule update
 ```
 
 cd 3rd/openssl/
-./Configure --prefix=$(pwd)/output –-cross-compile-prefix=<YOUR_CROSS_COMPILER>  no-asan no-asm no-async no-buildtest-c++ no-camellia no-cms no-comp no-crypto-mdebug no-crypto-mdebug-backtrace no-devcryptoeng no-dso no-dynamic-engine no-ec_nistp_64_gcc_128 no-egd no-external-tests no-fuzz-afl no-fuzz-libfuzzer no-heartbeats no-hw no-idea no-md2 no-md4 no-mdc2 no-msan no-ocsp no-rc5 no-rfc3779 no-rmd160 no-sctp no-seed no-shared no-srp no-sse2 no-ssl-trace no-ssl3 no-ssl3-method no-threads no-ts no-ubsan no-unit-test no-weak-ssl-ciphers no-zlib no-zlib-dynamic <YOUR_PLATFORM>
+./Configure no-asm no-async no-egd --prefix=$PWD –-cross-compile-prefix=<YOUR_CROSS_COMPILER> <YOUR_PLATFORM>
 
 ```
 
@@ -81,6 +96,29 @@ make
 ```
 
 Check the libcrypto.a & libssl.a files are generated in the openssl directory.
+
+5. Configure Curl project
+
+```
+
+cd ../curl
+autoreconf -fi
+export LD_LIBRARY_PATH=../openssl
+export CROSS_COMPILE=
+export LDFLAGS="-L$PWD/../openssl/"
+./configure ac_cv_func_RAND_egd=no --disable-shared --enable-static --with-ssl=$PWD/../openssl
+
+```
+
+6. Compile Curl project
+
+```
+
+make
+
+```
+
+Check the libcurl.a file is generated at lib/.libs/ folder.
 
 5. Compile IPC-H264-HLS-C-SDK
 
@@ -118,62 +156,84 @@ Check the s3_hls.a file is generated in the directory. You need to link this lib
 
 ```
 
-S3_Put_Initialize(ak, sk, token, region, bucket, prefix);
-
 #define BUFFER_SIZE	4*1024*1024 // 4MB
-if(S3_HLS_OK != S3_HLS_Initialize(BUFFER_SIZE)) {
+if(S3_HLS_OK != S3_HLS_SDK_Initialize(BUFFER_SIZE, region_name, bucket_name, prefix, custom_endpoint_name) ) {
     return FAILED;
 }
 
 ```
 
-2. Optionally set seperate frame type, frame per second etc.
+2. Set credential
 
-User don't need to set all these parameters but can adjust these parameters according to their own demand.
-
-```
-
-S3_HLS_Set_FPS(30); // each second will have 30 frames
-
-S3_HLS_Set_Segmentation_Frame(S3_HLS_H264E_NALU_SPS); // seperate files using sps frame
-
-S3_HLS_Set_Segmentation_Frame_Count(3); // seperate file when there are 3 sps frames in each file
-
+The credential used for SDK can be ak/sk generated using IAM console. The best practise is to use AWS IoT Device Managment.
+Use built in certificate to exchange temporary credential using Credentials Provider.
+Please refer to below blog for details:
+https://aws.amazon.com/blogs/security/how-to-eliminate-the-need-for-hardcoded-aws-credentials-in-devices-by-using-the-aws-iot-credentials-provider/
 
 ```
 
-The default values of above parameters are:
+if(S3_HLS_OK != S3_HLS_SDK_Set_Credential(argv[1], argv[2], argc >= 7 ? argv[6] : NULL)) {
+    S3_HLS_SDK_Finalize();
+    return FAILED;
+}
 
-FPS: 30
 
-Segmentation_Frame: S3_HLS_H264E_NALU_SPS
+```
 
-Segmentation_Frame_Count: 3
+During execution, user can call this function to replace credentials used to upload video clips.
 
-3. In the main thread of processing frames
+3. Optionally user can specify tags that added to uploaded video clips
+
+```
+
+S3_HLS_SDK_Set_Tag("key1=value1");
+
+```
+
+4. Start upload thread for upload video clips to S3
+
+```
+
+S3_HLS_SDK_Start_Upload();
+
+```
+
+5. In the main thread of processing frames
 
 ```
 
 // Main thread for processing frames:
 while(!exit) {
-    // Get frames from encoding module, pStart as frame start address, uLength as length of the frame.
-    if(S3_HLS_OK != S3_HLS_Put_Frame(pStart, uLength)) {
-        // Put frame to buffer failed, usually this is caused by buffer full
-        // Ensure IPC can connect to S3 and have good network status
-        printf("[Error]: Failed to put frame to buffer!\n");
-    }
+    // Get video stream from IPC
+    int nr_pack = stream->packCount;
+    
+	S3_HLS_FRAME_PACK s3_frame_pack;
+	s3_frame_pack.item_count = nr_pack;
+	
+	for(int i=0; i < nr_pack; i++) {
+		IMPEncoderPack *pack = &stream->pack[i];
+		// use timestamp generated by encoder
+		s3_frame_pack.items[i].timestamp = pack->timestamp;
+		if(pack->length){
+			uint32_t remSize = stream->streamSize - pack->offset;
+			if(remSize < pack->length){ // IPC buffer acrossed internal ring buffer boundary
+				s3_frame_pack.items[i].first_part_start = (void *)(stream->virAddr + pack->offset);
+				s3_frame_pack.items[i].first_part_length = remSize;
+				
+				s3_frame_pack.items[i].second_part_start = (void *)stream->virAddr;
+				s3_frame_pack.items[i].second_part_length = pack->length - remSize;
+			}else { // IPC buffer does not across internal ring buffer boundary
+				s3_frame_pack.items[i].first_part_start = (void *)(stream->virAddr + pack->offset);
+				s3_frame_pack.items[i].first_part_length = pack->length;
+				
+				s3_frame_pack.items[i].second_part_start = NULL;
+				s3_frame_pack.items[i].second_part_length = 0;
+			}
+	}
+
+	S3_HLS_SDK_Put_Video_Frame(&s3_frame_pack);
 }
 
-
-```
-
-4. Create a seperate thread for running upload process:
-
-```
-
-while(!exit) {
-    S3_HLS_Write_To_S3();
-}
 
 ```
 
@@ -181,8 +241,7 @@ while(!exit) {
 
 ```
 
-S3_HLS_Finalize();
-S3_Put_Finalize();
+S3_HLS_SDK_Finalize();
 
 ```
 
