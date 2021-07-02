@@ -1,0 +1,7 @@
+[submodule "3rd/openssl"]
+	path = 3rd/openssl
+	url = https://github.com/openssl/openssl
+	branch = OpenSSL_1_1_1-stable
+[submodule "3rd/curl"]
+	path = 3rd/curl
+	url = https://github.com/curl/curl
