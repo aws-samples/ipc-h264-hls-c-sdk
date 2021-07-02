@@ -46,7 +46,7 @@ int32_t S3_SHA256_Update(S3_SHA256_CTX* ctx, const void *data, uint32_t length);
 
 int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result);
 
-int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result);
+int32_t S3_HMAC_SHA256(const void* key, unsigned int key_length, const void* data, unsigned int data_length, S3_SHA256_HASH result);
 
 #ifdef __cplusplus
 #if __cplusplus

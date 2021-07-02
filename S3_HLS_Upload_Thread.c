@@ -32,11 +32,11 @@
 #endif
 
 
-static void* S3_HLS_Thread_Loop(void* ctx) {
+static void S3_HLS_Thread_Loop(void* ctx) {
     THREAD_DEBUG("Thread Initialized!\n");
     if(NULL == ctx) {
         THREAD_DEBUG("Cannot find thread context!\n");
-        return NULL;
+        return;
     }
     
     S3_HLS_THREAD_CTX* thread_ctx = (S3_HLS_THREAD_CTX*)ctx;

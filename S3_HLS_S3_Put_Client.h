@@ -96,12 +96,12 @@ int32_t S3_HLS_Client_Set_Credential(S3_HLS_CLIENT_CTX* ctx, char* ak, char* sk,
 /*
  *
  */
-int32_t S3_HLS_Client_Upload_Buffer(S3_HLS_CLIENT_CTX* ctx, char* object_key, char* first_data, uint32_t first_length, char* second_data, uint32_t second_length);
+int32_t S3_HLS_Client_Upload_Buffer(S3_HLS_CLIENT_CTX* ctx, char* object_key, uint8_t* first_data, uint32_t first_length, uint8_t* second_data, uint32_t second_length);
 
 /*
  *
  */
-int32_t S3_HLS_Client_Upload_Object(S3_HLS_CLIENT_CTX* ctx, char* object_key, char* data, uint32_t length);
+int32_t S3_HLS_Client_Upload_Object(S3_HLS_CLIENT_CTX* ctx, char* object_key, uint8_t* data, uint32_t length);
 
 #ifdef __cplusplus
 #if __cplusplus

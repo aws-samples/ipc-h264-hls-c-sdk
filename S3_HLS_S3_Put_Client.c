@@ -225,7 +225,7 @@ S3_HLS_CLIENT_CTX* S3_HLS_Client_Initialize(char* region, char* bucket, char* en
         goto l_free_host_header;
     }
         
-    length = snprintf(NULL, 0, S3_HLS_HTTPS_URI_FORMAT, ret->endpoint);
+    length = snprintf(NULL, 0, S3_HLS_HTTPS_URI_FORMAT, ret->endpoint, S3_HLS_EMPTY_STRING);
     if(0 >= length) {
         PUT_DEBUG("Unable To Get HTTPS URI Length!\n");
         goto l_free_string_to_sign;
@@ -253,7 +253,6 @@ l_free_endpoint:
     if(ret->free_endpoint)
         free(ret->endpoint);
         
-l_free_credential_lock:
     pthread_mutex_destroy(&ret->credential_lock);
     curl_easy_cleanup(ret->curl);
     
@@ -292,6 +291,8 @@ int32_t S3_HLS_Client_Finalize(S3_HLS_CLIENT_CTX* ctx) {
         free(ctx->host_header);
 
     free(ctx);
+    
+    return S3_HLS_OK;
 }
 
 int32_t S3_HLS_Client_Set_Tag(S3_HLS_CLIENT_CTX* ctx, char* object_tag) {
@@ -620,7 +621,7 @@ static int32_t S3_HLS_Hash_Put_Canonical_Request(S3_HLS_CLIENT_CTX* ctx, char* o
     return S3_SHA256_Final(&sha256_ctx, result);
 }
 
-int32_t S3_HLS_Client_Upload_Buffer(S3_HLS_CLIENT_CTX* ctx, char* object_key, char* first_data, uint32_t first_length, char* second_data, uint32_t second_length) {
+int32_t S3_HLS_Client_Upload_Buffer(S3_HLS_CLIENT_CTX* ctx, char* object_key, uint8_t* first_data, uint32_t first_length, uint8_t* second_data, uint32_t second_length) {
     uint8_t retry_flag = 0;
 
     PUT_DEBUG("Upload start!\n");
@@ -859,6 +860,6 @@ l_retry_entry:
     return S3_HLS_OK;
 }
 
-int32_t S3_HLS_Client_Upload_Object(S3_HLS_CLIENT_CTX* ctx, char* object_key, char* data, uint32_t length) {
+int32_t S3_HLS_Client_Upload_Object(S3_HLS_CLIENT_CTX* ctx, char* object_key, uint8_t* data, uint32_t length) {
     return S3_HLS_Client_Upload_Buffer(ctx, object_key, data, length, NULL, 0);
 }

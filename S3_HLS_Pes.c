@@ -234,6 +234,10 @@ int32_t S3_HLS_Pes_Write_Video_Frame(S3_HLS_BUFFER_CTX* buffer_ctx, S3_HLS_FRAME
     
     if(0 == pcr_count) {
         has_pcr = S3_HLS_TRUE;
+        pcr_count++;
+        if(pcr_count_interval == pcr_count) {
+            pcr_count = 0;
+        }
     }
     
     S3_HLS_TS_Set_Pid(S3_HLS_Video_PID);

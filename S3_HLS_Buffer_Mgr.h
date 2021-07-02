@@ -87,7 +87,7 @@ int32_t S3_HLS_Clear_Buffer(S3_HLS_BUFFER_CTX* buffer_ctx, S3_HLS_BUFFER_PART_CT
  * Return number of bytes written to buffer if success
  * Return negative error code if failed
  */
-int32_t S3_HLS_Put_To_Buffer(S3_HLS_BUFFER_CTX* ctx, char* data, uint32_t length);
+int32_t S3_HLS_Put_To_Buffer(S3_HLS_BUFFER_CTX* ctx, uint8_t* data, uint32_t length);
 
 int32_t S3_HLS_Lock_Buffer(S3_HLS_BUFFER_CTX* ctx);
 

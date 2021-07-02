@@ -1,6 +1,8 @@
 #ifndef __S3_HLS_RETURN_CODE_H__
 #define __S3_HLS_RETURN_CODE_H__
 
+#include <stdint.h>
+
 // Return value part
 #define S3_HLS_OK                                   0
 #define S3_HLS_OUT_OF_MEMORY                        -1
@@ -23,5 +25,5 @@
 
 #define S3_HLS_TS_PACKET_SIZE                       188
 
-extern char const_fill_word[S3_HLS_TS_PACKET_SIZE];
+extern uint8_t const_fill_word[S3_HLS_TS_PACKET_SIZE];
 #endif

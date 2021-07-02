@@ -45,7 +45,7 @@ int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result) {
     return SHA256_Final(result, ctx);
 }
 
-int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result){
+int32_t S3_HMAC_SHA256(const void* key, unsigned int key_length, const void* data, unsigned int data_length, S3_SHA256_HASH result){
     const EVP_MD * engine = EVP_sha256();
     unsigned int ret_length = 0;
 

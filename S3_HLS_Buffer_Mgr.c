@@ -118,7 +118,7 @@ int32_t S3_HLS_Flush_Buffer(S3_HLS_BUFFER_CTX* ctx) {
             part_ctx.timestamp = ctx->last_flush_timestamp;
             
             ctx->call_back(&part_ctx);
-            printf("Flush Buffer %ld, %ld, %d, %ld, %d\n", ctx->last_flush, part_ctx.first_part_start, part_ctx.first_part_length, part_ctx.second_part_start, part_ctx.second_part_length);
+            printf("Flush Buffer %p, %p, %d, %p, %d\n", ctx->last_flush, part_ctx.first_part_start, part_ctx.first_part_length, part_ctx.second_part_start, part_ctx.second_part_length);
         }
     
         ctx->last_flush = cur_pos;
@@ -141,9 +141,9 @@ int32_t S3_HLS_Clear_Buffer(S3_HLS_BUFFER_CTX* buffer_ctx, S3_HLS_BUFFER_PART_CT
         return S3_HLS_INVALID_PARAMETER;
 
     // Only support clear buffer in sequence, not support clear buffer in middle of used buffer
-    printf("Clear Buffer %ld, %d, %ld, %d\n", part_ctx->first_part_start, part_ctx->first_part_length, part_ctx->second_part_start, part_ctx->second_part_length);
+    printf("Clear Buffer %p, %d, %p, %d\n", part_ctx->first_part_start, part_ctx->first_part_length, part_ctx->second_part_start, part_ctx->second_part_length);
     if(buffer_ctx->used_start != part_ctx->first_part_start) {
-        printf("Clear buffer not match start! %ld, %ld\n", buffer_ctx->used_start, part_ctx->first_part_start);
+        printf("Clear buffer not match start! %p, %p\n", buffer_ctx->used_start, part_ctx->first_part_start);
     }
     
     uint8_t* next_start = (NULL == part_ctx->second_part_start) ? (part_ctx->first_part_start + part_ctx->first_part_length) : (part_ctx->second_part_start + part_ctx->second_part_length);
@@ -160,11 +160,11 @@ int32_t S3_HLS_Clear_Buffer(S3_HLS_BUFFER_CTX* buffer_ctx, S3_HLS_BUFFER_PART_CT
     buffer_ctx->used_length -= release_length;
     buffer_ctx->used_start += release_length;
 */    
-    printf("Buffer Info: %ld, %ld, %ld, %d\n", buffer_ctx->used_start, buffer_ctx->used_length, buffer_ctx->buffer_start, buffer_ctx->total_length);
+    printf("Buffer Info: %p, %u, %p, %d\n", buffer_ctx->used_start, buffer_ctx->used_length, buffer_ctx->buffer_start, buffer_ctx->total_length);
     if(buffer_ctx->used_start >= buffer_ctx->buffer_start + buffer_ctx->total_length) {
         buffer_ctx->used_start -= buffer_ctx->total_length;
     }
-    printf("New Buffer Start: %ld\n", buffer_ctx->used_start);
+    printf("New Buffer Start: %p\n", buffer_ctx->used_start);
 
     return S3_HLS_OK;
 }
@@ -172,7 +172,7 @@ int32_t S3_HLS_Clear_Buffer(S3_HLS_BUFFER_CTX* buffer_ctx, S3_HLS_BUFFER_PART_CT
 /*
  * Put data into buffer
  */
-int32_t S3_HLS_Put_To_Buffer(S3_HLS_BUFFER_CTX* ctx, char* data, uint32_t length) {
+int32_t S3_HLS_Put_To_Buffer(S3_HLS_BUFFER_CTX* ctx, uint8_t* data, uint32_t length) {
     BUFFER_DEBUG("Putting Buffer!\n");
     if(NULL == ctx) {
         BUFFER_DEBUG("Invalid Buffer Context!\n");
