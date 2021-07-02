@@ -16,8 +16,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __S3_REQUEST_H__
-#define __S3_REQUEST_H__
+#ifndef __S3_HLS_H264_NALU_TYPES_H__
+#define __S3_HLS_H264_NALU_TYPES_H__
+
+#include "stdint.h"
+#include "S3_HLS_SDK.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -25,27 +28,23 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-#define S3_SIMPLE_PUT_OK                        0
-#define S3_SIMPLE_PUT_NOT_ENOUGHT_MEMORY        -1
-#define S3_SIMPLE_RUNTIME_ERROR                 -2
-#define S3_SIMPLE_PUT_CREATE_SOCKET_FAILED      -3
-#define S3_SIMPLE_PUT_CONNECT_FAILED            -4
-#define S3_SIMPLE_PUT_SEND_DATA_FAILED          -5
+typedef enum {
+    S3_HLS_H264E_NALU_UNSPECIFIED = 0,
+    S3_HLS_H264E_NALU_NON_IDR = 1,
+    S3_HLS_H264E_NALU_DPA = 2,
+    S3_HLS_H264E_NALU_DPB = 3,
+    S3_HLS_H264E_NALU_DPC = 4,
+    S3_HLS_H264E_NALU_IDR = 5,
+    S3_HLS_H264E_NALU_SEI = 6,
+    S3_HLS_H264E_NALU_SPS = 7,
+    S3_HLS_H264E_NALU_PPS = 8,
+    S3_HLS_H264E_NALU_AUD = 9, // Access Unit Delimeter
+    S3_HLS_H264E_NALU_END_SEQ = 10,
+    S3_HLS_H264E_NALU_END_STREAM = 11,
+    S3_HLS_H264E_NALU_FILLER = 12
+} S3_HLS_H264E_NALU_TYPE_E;
 
-/**
- * Initialize S3 put, input parameters including AK/SK and optionally the token used for temporary credential, the region to upload and the bucket name and user defined prefix
- */
-void S3_Put_Initialize(char* ak, char* sk, char* token, char* region, char* bucket, char* prefix);
-
-/**
- * Clean up resources before exit
- */
-void S3_Put_Finalize();
-
-/**
- * This is used for upload object. The prefix will be added to the key.
- */
-int S3_Put_Object(char* object_key, unsigned char* payload, unsigned int size);
+S3_HLS_H264E_NALU_TYPE_E S3_HLS_H264_Nalu_Type(S3_HLS_FRAME_ITEM* item);
 
 #ifdef __cplusplus
 #if __cplusplus

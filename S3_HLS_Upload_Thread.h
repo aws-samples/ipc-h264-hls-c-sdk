@@ -16,14 +16,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __S3_CRYPTO_H__
-#define __S3_CRYPTO_H__
+#ifndef __S3_HLS_UPLOAD_THREAD_H__
+#define __S3_HLS_UPLOAD_THREAD_H__
 
 #include "stdint.h"
-
-#include "openssl/evp.h"
-#include "openssl/sha.h"
-#include "openssl/hmac.h"
+#include "pthread.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -31,22 +28,30 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-#define S3_CRYPTO_OK                    0
-#define S3_CRYPTO_FAILED                -1
-#define S3_SHA256_DIGEST_LENGTH         32
+typedef void (*THREAD_RUN)();
 
-typedef SHA256_CTX S3_SHA256_CTX;
-typedef HMAC_CTX   S3_HMAC_SHA256_CTX;
+typedef struct s3_hls_thread_s {
+    pthread_t thread_id;
+    uint8_t exit_flag;
 
-typedef unsigned char S3_SHA256_HASH[S3_SHA256_DIGEST_LENGTH];
+    THREAD_RUN run;
+} S3_HLS_THREAD_CTX;
 
-int32_t S3_SHA256_Init(S3_SHA256_CTX* ctx);
+/*
+ * Initialize resources and create thread context but not start the thread
+ */
+S3_HLS_THREAD_CTX* S3_HLS_Upload_Thread_Initialize(THREAD_RUN call_back);
 
-int32_t S3_SHA256_Update(S3_SHA256_CTX* ctx, const void *data, uint32_t length);
+/*
+ * Start thread in given thread ctx
+ */
+int32_t S3_HLS_Upload_Thread_Start(S3_HLS_THREAD_CTX* ctx);
 
-int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result);
-
-int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result);
+/*
+ * Stop thread and free ctx object
+ * User should not use ctx after calling this function
+ */
+int32_t S3_HLS_Upload_Thread_Stop(S3_HLS_THREAD_CTX* ctx);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -55,4 +60,3 @@ int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, 
 #endif /* End of #ifdef __cplusplus */
 
 #endif
-

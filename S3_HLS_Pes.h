@@ -16,14 +16,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __S3_CRYPTO_H__
-#define __S3_CRYPTO_H__
+#ifndef __S3_HLS_H264_PES_H__
+#define __S3_HLS_H264_PES_H__
 
-#include "stdint.h"
-
-#include "openssl/evp.h"
-#include "openssl/sha.h"
-#include "openssl/hmac.h"
+#include "S3_HLS_SDK.h"
+#include "S3_HLS_Buffer_Mgr.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -31,22 +28,22 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-#define S3_CRYPTO_OK                    0
-#define S3_CRYPTO_FAILED                -1
-#define S3_SHA256_DIGEST_LENGTH         32
+#define ERR_S3_HLS_H264_PES_NULL_BUFFER                 -1
+#define ERR_S3_HLS_H264_PES_INVALID_BUFFER_LENGTH       -2
 
-typedef SHA256_CTX S3_SHA256_CTX;
-typedef HMAC_CTX   S3_HMAC_SHA256_CTX;
+/*
+ * write PES header to buffer
+ * internal execution will set stream types for different stream type
+ * returns number of bytes written to the buffer
+ */
+int32_t S3_HLS_Pes_Write_Video_Frame(S3_HLS_BUFFER_CTX* ctx, S3_HLS_FRAME_PACK* pack);
 
-typedef unsigned char S3_SHA256_HASH[S3_SHA256_DIGEST_LENGTH];
-
-int32_t S3_SHA256_Init(S3_SHA256_CTX* ctx);
-
-int32_t S3_SHA256_Update(S3_SHA256_CTX* ctx, const void *data, uint32_t length);
-
-int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result);
-
-int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result);
+/*
+ * write PES header to buffer
+ * internal execution will set stream types for different stream type
+ * returns number of bytes written to the buffer
+ */
+int32_t S3_HLS_Pes_Write_Audio_Frame(S3_HLS_BUFFER_CTX* ctx, S3_HLS_FRAME_PACK* pack);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -55,4 +52,3 @@ int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, 
 #endif /* End of #ifdef __cplusplus */
 
 #endif
-

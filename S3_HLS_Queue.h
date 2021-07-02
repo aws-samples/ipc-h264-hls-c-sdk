@@ -16,14 +16,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __S3_CRYPTO_H__
-#define __S3_CRYPTO_H__
+#ifndef __S3_HLS_QUEUE_H__
+#define __S3_HLS_QUEUE_H__
 
 #include "stdint.h"
+#include "time.h"
 
-#include "openssl/evp.h"
-#include "openssl/sha.h"
-#include "openssl/hmac.h"
+#include "S3_HLS_Buffer_Mgr.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -31,22 +30,25 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-#define S3_CRYPTO_OK                    0
-#define S3_CRYPTO_FAILED                -1
-#define S3_SHA256_DIGEST_LENGTH         32
+#define S3_HLS_MAX_PARTS_IN_BUFFER      10
 
-typedef SHA256_CTX S3_SHA256_CTX;
-typedef HMAC_CTX   S3_HMAC_SHA256_CTX;
+typedef struct s3_hls_queue_s {
+    S3_HLS_BUFFER_PART_CTX queue[S3_HLS_MAX_PARTS_IN_BUFFER];
+    uint8_t queue_pos;
+    uint8_t queue_length;
+    
+    pthread_mutex_t s3_hls_queue_lock;
+} S3_HLS_QUEUE_CTX;
 
-typedef unsigned char S3_SHA256_HASH[S3_SHA256_DIGEST_LENGTH];
+S3_HLS_QUEUE_CTX* S3_HLS_Initialize_Queue();
 
-int32_t S3_SHA256_Init(S3_SHA256_CTX* ctx);
+int32_t S3_HLS_Add_To_Queue(S3_HLS_QUEUE_CTX* ctx, uint8_t* first_part, uint32_t first_length, uint8_t* second_part, uint32_t second_length, time_t timestamp);
 
-int32_t S3_SHA256_Update(S3_SHA256_CTX* ctx, const void *data, uint32_t length);
+int32_t S3_HLS_Release_Queue(S3_HLS_QUEUE_CTX* ctx);
 
-int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result);
+int32_t S3_HLS_Finalize_Queue(S3_HLS_QUEUE_CTX* ctx);
 
-int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result);
+int32_t S3_HLS_Get_Item_From_Queue(S3_HLS_QUEUE_CTX* ctx, S3_HLS_BUFFER_PART_CTX* buffer_ctx);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -55,4 +57,3 @@ int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, 
 #endif /* End of #ifdef __cplusplus */
 
 #endif
-

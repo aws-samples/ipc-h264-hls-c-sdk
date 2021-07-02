@@ -16,21 +16,36 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <pthread.h>
+
 #include "S3_Crypto.h"
-#include "openssl/evp.h"
-#include "openssl/sha.h"
-#include "openssl/hmac.h"
+#include "S3_HLS_Return_Code.h"
 
-int S3_SHA256(char* data, unsigned int length, unsigned char* output){
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, data, length);
-    SHA256_Final(output, &sha256);
+int32_t S3_SHA256_Init(S3_SHA256_CTX* ctx) {
+    if(NULL == ctx) {
+        return S3_HLS_INVALID_PARAMETER;
+    }
 
-    return S3_CRYPTO_OK;
+    return SHA256_Init(ctx);
 }
 
-int S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, unsigned char* output, unsigned int output_length){
+int32_t S3_SHA256_Update(S3_SHA256_CTX* ctx, const void *data, uint32_t length) {
+    if(NULL == ctx) {
+        return S3_HLS_INVALID_PARAMETER;
+    }
+
+    return SHA256_Update(ctx, data, length);
+}
+
+int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result) {
+    if(NULL == ctx) {
+        return S3_HLS_INVALID_PARAMETER;
+    }
+
+    return SHA256_Final(result, ctx);
+}
+
+int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result){
     const EVP_MD * engine = EVP_sha256();
     unsigned int ret_length = 0;
 
@@ -43,7 +58,7 @@ int S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsi
     HMAC_Init_ex(ctx, key, key_length, engine, NULL);  
     HMAC_Update(ctx, (unsigned char*)data, data_length); 
   
-    HMAC_Final(ctx, output, &ret_length);  
+    HMAC_Final(ctx, result, &ret_length);  
   
     HMAC_CTX_free(ctx);
 

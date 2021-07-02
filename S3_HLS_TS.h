@@ -16,14 +16,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __S3_CRYPTO_H__
-#define __S3_CRYPTO_H__
+#ifndef __S3_HLS_H264_PMT_H__
+#define __S3_HLS_H264_PMT_H__
 
 #include "stdint.h"
-
-#include "openssl/evp.h"
-#include "openssl/sha.h"
-#include "openssl/hmac.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -31,22 +27,41 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-#define S3_CRYPTO_OK                    0
-#define S3_CRYPTO_FAILED                -1
-#define S3_SHA256_DIGEST_LENGTH         32
+/*
+ * Call this function to write TS header and adoption field to buffer
+ */
+int32_t S3_HLS_TS_Write_To_Buffer();
 
-typedef SHA256_CTX S3_SHA256_CTX;
-typedef HMAC_CTX   S3_HMAC_SHA256_CTX;
+/*
+ * Call this function to set pid before write TS Header to buffer
+ */
+void S3_HLS_TS_Set_Pid(uint32_t pid);
 
-typedef unsigned char S3_SHA256_HASH[S3_SHA256_DIGEST_LENGTH];
+/*
+ * Call this function to set payload start flag before write TS Header to buffer
+ */
+void S3_HLS_TS_Set_Payload_Start();
 
-int32_t S3_SHA256_Init(S3_SHA256_CTX* ctx);
+/*
+ * Call this function to set random access flag before write TS Header to buffer
+ */
+void S3_HLS_TS_Set_Random_Access();
 
-int32_t S3_SHA256_Update(S3_SHA256_CTX* ctx, const void *data, uint32_t length);
+/*
+ * Call this function to set PCR flag and value before write TS Header to buffer
+ */
+void S3_HLS_TS_Set_PCR(uint64_t input_timestamp);
 
-int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result);
+/*
+ * Call this function to fill adoption fields if data_length is less than remaining bytes. 
+ * Call this function before write TS Header to buffer and after set random access and pcr
+ */
+void S3_HLS_TS_Fill_Remaining_Length(uint32_t data_length);
 
-int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result);
+/*
+ * Call this function to reset the counter field in ts header
+ */
+void S3_HLS_TS_Reset_Counter(uint32_t pid);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -55,4 +70,3 @@ int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, 
 #endif /* End of #ifdef __cplusplus */
 
 #endif
-

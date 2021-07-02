@@ -16,14 +16,10 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __S3_CRYPTO_H__
-#define __S3_CRYPTO_H__
+#ifndef __S3_HLS_PMT_H__
+#define __S3_HLS_PMT_H__
 
 #include "stdint.h"
-
-#include "openssl/evp.h"
-#include "openssl/sha.h"
-#include "openssl/hmac.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -31,22 +27,16 @@ extern "C" {
 #endif
 #endif /* End of #ifdef __cplusplus */
 
-#define S3_CRYPTO_OK                    0
-#define S3_CRYPTO_FAILED                -1
-#define S3_SHA256_DIGEST_LENGTH         32
+#define ERR_S3_HLS_H264_PMT_NULL_BUFFER                 -1
+#define ERR_S3_HLS_H264_PMT_INVALID_BUFFER_LENGTH       -2
 
-typedef SHA256_CTX S3_SHA256_CTX;
-typedef HMAC_CTX   S3_HMAC_SHA256_CTX;
-
-typedef unsigned char S3_SHA256_HASH[S3_SHA256_DIGEST_LENGTH];
-
-int32_t S3_SHA256_Init(S3_SHA256_CTX* ctx);
-
-int32_t S3_SHA256_Update(S3_SHA256_CTX* ctx, const void *data, uint32_t length);
-
-int32_t S3_SHA256_Final(S3_SHA256_CTX *ctx, S3_SHA256_HASH result);
-
-int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, unsigned int data_length, S3_SHA256_HASH result);
+/*
+ * write PMT header to buffer
+ * as pmt is fixed for given stream will only verify size
+ * returns number of bytes written to the buffer
+ */
+int32_t S3_HLS_H264_PMT_Write_To_Buffer();
+void S3_HLS_PMT_Reset_Counter();
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -55,4 +45,3 @@ int32_t S3_HMAC_SHA256(unsigned char* key, unsigned int key_length, char* data, 
 #endif /* End of #ifdef __cplusplus */
 
 #endif
-
