@@ -300,7 +300,7 @@ int32_t S3_HLS_Pes_Write_Video_Frame(S3_HLS_BUFFER_CTX* buffer_ctx, S3_HLS_FRAME
             uint8_t* start_pos;
             uint32_t write_length;
             
-            if(packet_pos > pack->items[packet_index].first_part_length) { // writing second part
+            if(packet_pos >= pack->items[packet_index].first_part_length) { // writing second part
                 // need to copy from second part
                 start_pos = pack->items[packet_index].second_part_start + (packet_pos - pack->items[packet_index].first_part_length);
                 write_length = remaining < (pack->items[packet_index].first_part_length + pack->items[packet_index].second_part_length - packet_pos) ? remaining : (pack->items[packet_index].first_part_length + pack->items[packet_index].second_part_length - packet_pos);
@@ -431,7 +431,7 @@ int32_t S3_HLS_Pes_Write_Audio_Frame(S3_HLS_BUFFER_CTX* buffer_ctx, S3_HLS_FRAME
             uint8_t* start_pos;
             uint32_t write_length;
             
-            if(packet_pos > pack->items[packet_index].first_part_length) { // writing second part
+            if(packet_pos >= pack->items[packet_index].first_part_length) { // writing second part
                 // need to copy from second part
                 start_pos = pack->items[packet_index].second_part_start + (packet_pos - pack->items[packet_index].first_part_length);
                 write_length = remaining < (pack->items[packet_index].first_part_length + pack->items[packet_index].second_part_length - packet_pos) ? remaining : (pack->items[packet_index].first_part_length + pack->items[packet_index].second_part_length - packet_pos);
